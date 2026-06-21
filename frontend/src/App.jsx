@@ -11,7 +11,8 @@ import {
   Search, Zap, Star, ZoomIn, ZoomOut, RotateCcw, ChevronDown, Filter,
   Eye, Plus, Maximize2, Calculator, Grid, Code, Flame, Mail, Phone,
   MapPin, Settings, RefreshCw, Layers2, FileCode2, Terminal, HelpCircle,
-  Check, AlertCircle, Pause, Play as PlayIcon, Save, FolderOpen, FileSpreadsheet, X
+  Check, AlertCircle, Pause, Play as PlayIcon, Save, FolderOpen, FileSpreadsheet, X,
+  Share2, Send
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -160,7 +161,7 @@ const aggregateCandles = (data, timeframe) => {
 };
 
 // ---------- MEMOIZED CHART COMPONENTS ----------
-const StrategyChart = memo(({ data, onConfigure, showDropdown, controls, setControls }) => {
+const StrategyChart = memo(({ data, onConfigure, showDropdown, controls, setControls, isDarkMode }) => {
   const equityYDomain = useMemo(() => {
     if (!data || data.length === 0) return [0, 200000];
     let low = Infinity, high = -Infinity;
@@ -174,18 +175,18 @@ const StrategyChart = memo(({ data, onConfigure, showDropdown, controls, setCont
   }, [data, controls.vOffset]);
 
   return (
-    <div className="p-4 rounded border bg-[#161a1e] border-[#2b3139] min-h-[360px] relative shadow-xl">
+    <div className={`p-4 rounded border ${isDarkMode ? 'bg-[#161a1e] border-[#2b3139]' : 'bg-white border-gray-300'} min-h-[360px] relative shadow-xl`}>
       <div className="flex justify-between items-center mb-3 border-b pb-2 border-slate-700/10">
-        <span className="text-[10px] font-bold text-[#02c076] uppercase flex items-center gap-1">
+        <span className={`text-[10px] font-bold uppercase flex items-center gap-1 ${isDarkMode ? 'text-[#02c076]' : 'text-emerald-600'}`}>
           <TrendingUp size={12}/> STRATEGY COMP_EQUITY COMPOUND HORIZON LINE
         </span>
         <div className="flex items-center gap-2">
-          <button onClick={onConfigure} className="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[9px] text-amber-400 flex items-center gap-1 cursor-pointer">
+          <button onClick={onConfigure} className={`px-2 py-0.5 rounded text-[9px] flex items-center gap-1 cursor-pointer ${isDarkMode ? 'bg-slate-800 border-slate-700 text-amber-400' : 'bg-gray-200 border-gray-300 text-amber-600'}`}>
             Configure Context <ChevronDown size={10}/>
           </button>
         </div>
         {showDropdown && (
-          <div className="absolute right-4 top-11 bg-slate-900 border border-slate-700 p-2 z-40 rounded flex flex-col gap-1 w-[150px] text-[10px] shadow-2xl">
+          <div className={`absolute right-4 top-11 border p-2 z-40 rounded flex flex-col gap-1 w-[150px] text-[10px] shadow-2xl ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-300'}`}>
             <button onClick={() => setControls(p => ({ ...p, zoom: p.zoom + 0.4 }))} className="bg-slate-800 p-1 text-left hover:text-white text-slate-300">Zoom Canvas (+)</button>
             <button onClick={() => setControls(p => ({ ...p, zoom: Math.max(1, p.zoom - 0.4) }))} className="bg-slate-800 p-1 text-left hover:text-white text-slate-300">Zoom Out (-)</button>
             <button onClick={() => setControls(p => ({ ...p, vOffset: p.vOffset + 8000 }))} className="bg-slate-800 p-1 text-left hover:text-white text-slate-300">Shift Up ▲</button>
@@ -200,8 +201,8 @@ const StrategyChart = memo(({ data, onConfigure, showDropdown, controls, setCont
             <CartesianGrid strokeDasharray="2 2" stroke="#242a32" opacity={0.4} />
             <XAxis dataKey="date" stroke="#64748b" fontSize={9} tickLine={false} />
             <YAxis stroke="#64748b" fontSize={9} domain={equityYDomain} orientation="right" tickLine={false} allowDataOverflow={false} />
-            <Tooltip contentStyle={{ backgroundColor: '#161a1e', borderColor: '#2b3139', fontSize: '11px', borderRadius: '4px' }} />
-            <Legend wrapperStyle={{ fontSize: '10px', pt: '10px' }} />
+            <Tooltip contentStyle={{ backgroundColor: isDarkMode ? '#161a1e' : '#f9f9f9', borderColor: isDarkMode ? '#2b3139' : '#ccc', fontSize: '11px', borderRadius: '4px' }} itemStyle={{ color: isDarkMode ? '#ffffff' : '#000000' }} />
+            <Legend wrapperStyle={{ fontSize: '10px', pt: '10px', color: isDarkMode ? '#ffffff' : '#000000' }} />
             <Area type="monotone" name="Strategy Portfolio Alpha" dataKey="value" fill="url(#colorStratArea)" stroke="#02c076" strokeWidth={2.5} dot={false} isAnimationActive={false} />
             <Line type="monotone" name="Nifty 50 Anchor Baseline" dataKey="benchmark" stroke="#848e9c" strokeWidth={1.2} strokeDasharray="3 3" dot={false} isAnimationActive={false} />
             <defs>
@@ -217,7 +218,7 @@ const StrategyChart = memo(({ data, onConfigure, showDropdown, controls, setCont
   );
 });
 
-const DrawdownChart = memo(({ data }) => {
+const DrawdownChart = memo(({ data, isDarkMode }) => {
   const drawdownYDomain = useMemo(() => {
     if (!data || data.length === 0) return [-30, 0];
     let low = 0, high = 0;
@@ -231,7 +232,7 @@ const DrawdownChart = memo(({ data }) => {
   }, [data]);
 
   return (
-    <div className="p-4 rounded border bg-[#161a1e] border-[#2b3139] min-h-[220px] shadow-xl">
+    <div className={`p-4 rounded border ${isDarkMode ? 'bg-[#161a1e] border-[#2b3139]' : 'bg-white border-gray-300'} min-h-[220px] shadow-xl`}>
       <span className="text-[10px] font-bold text-[#f6465d] uppercase flex items-center gap-1 border-b pb-1 border-slate-700/10 mb-2">
         <AlertTriangle size={12} /> UNDERWATER MAXIMUM HARNESS PROFILE DRAWDOWN %
       </span>
@@ -241,7 +242,7 @@ const DrawdownChart = memo(({ data }) => {
             <CartesianGrid strokeDasharray="2 2" stroke="#242a32" opacity={0.4} />
             <XAxis dataKey="date" stroke="#64748b" fontSize={9} />
             <YAxis stroke="#64748b" fontSize={9} domain={drawdownYDomain} orientation="right" />
-            <Tooltip contentStyle={{ backgroundColor: '#161a1e', borderColor: '#2b3139' }} />
+            <Tooltip contentStyle={{ backgroundColor: isDarkMode ? '#161a1e' : '#f9f9f9', borderColor: isDarkMode ? '#2b3139' : '#ccc' }} itemStyle={{ color: isDarkMode ? '#ffffff' : '#000000' }} />
             <ReferenceLine y={0} stroke="#474f59" />
             <Line type="monotone" dataKey="value" stroke="#f6465d" strokeWidth={1.5} dot={false} isAnimationActive={false} />
           </LineChart>
@@ -273,7 +274,8 @@ const RealTimeChart = memo(({
   chartOffset,
   setChartOffset,
   isHistoricalLoading,
-  isIntradayLoading
+  isIntradayLoading,
+  isDarkMode
 }) => {
   const rawData = useMemo(() => {
     if (showHistorical && historicalData.length > 0) {
@@ -329,7 +331,7 @@ const RealTimeChart = memo(({
 
   if (isHistoricalLoading || isIntradayLoading) {
     return (
-      <div className="p-4 rounded border bg-[#161a1e] border-[#2b3139] min-h-[460px] flex items-center justify-center shadow-2xl">
+      <div className={`p-4 rounded border ${isDarkMode ? 'bg-[#161a1e] border-[#2b3139]' : 'bg-white border-gray-300'} min-h-[460px] flex items-center justify-center shadow-2xl`}>
         <div className="text-center text-slate-500 font-bold">
           <RefreshCw size={24} className="animate-spin text-amber-500 mx-auto mb-2"/>
           <span>Loading data...</span>
@@ -340,7 +342,7 @@ const RealTimeChart = memo(({
 
   if (displayData.length === 0) {
     return (
-      <div className="p-4 rounded border bg-[#161a1e] border-[#2b3139] min-h-[460px] flex items-center justify-center shadow-2xl">
+      <div className={`p-4 rounded border ${isDarkMode ? 'bg-[#161a1e] border-[#2b3139]' : 'bg-white border-gray-300'} min-h-[460px] flex items-center justify-center shadow-2xl`}>
         <div className="text-center text-slate-500 font-bold">
           <span>{showHistorical ? 'No historical data available for this symbol.' : 'No realtime data yet.'}</span>
         </div>
@@ -348,8 +350,12 @@ const RealTimeChart = memo(({
     );
   }
 
+  const bgColor = isDarkMode ? '#161a1e' : '#f9f9f9';
+  const borderColor = isDarkMode ? '#2b3139' : '#ccc';
+  const textColor = isDarkMode ? '#ffffff' : '#000000';
+
   return (
-    <div className="p-4 rounded border bg-[#161a1e] border-[#2b3139] flex flex-col justify-between shadow-2xl relative">
+    <div className={`p-4 rounded border ${isDarkMode ? 'bg-[#161a1e] border-[#2b3139]' : 'bg-white border-gray-300'} flex flex-col justify-between shadow-2xl relative`}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-2 border-slate-800 text-[10px] font-bold select-none z-10">
         <div className="flex items-center gap-2">
           <select
@@ -358,7 +364,7 @@ const RealTimeChart = memo(({
               setShowHistorical(false);
               onSymbolChange(e.target.value);
             }}
-            className="text-xs bg-[#f0b90b] text-slate-950 px-1.5 py-0.5 rounded font-black font-sans shadow cursor-pointer hover:bg-amber-400 transition-colors max-w-[160px] truncate"
+            className={`text-xs px-1.5 py-0.5 rounded font-black font-sans shadow cursor-pointer hover:bg-amber-400 transition-colors max-w-[160px] truncate ${isDarkMode ? 'bg-[#f0b90b] text-slate-950' : 'bg-amber-400 text-slate-950'}`}
             disabled={isSymbolsLoading}
           >
             {allSymbols.map((item) => (
@@ -424,7 +430,7 @@ const RealTimeChart = memo(({
               <CartesianGrid strokeDasharray="1 3" stroke="#242a32" opacity={0.5} />
               <XAxis dataKey="timestamp" stroke="#64748b" fontSize={9} tickLine={false} />
               <YAxis stroke="#64748b" fontSize={9} domain={yDomain} orientation="right" tickLine={false} />
-              <Tooltip contentStyle={{ backgroundColor: '#12161a', borderColor: '#474f59' }} />
+              <Tooltip contentStyle={{ backgroundColor: bgColor, borderColor: borderColor }} itemStyle={{ color: textColor }} />
               <Line type="monotone" name="Close Price" dataKey="closePrice" stroke="#f0b90b" strokeWidth={2.5} dot={false} isAnimationActive={false} />
               {indicators.movingAverage50 && <Line type="monotone" name="MA (50)" dataKey="ma50" stroke="#10b981" strokeWidth={1} dot={false} strokeDasharray="2 2" isAnimationActive={false} />}
               {indicators.movingAverage200 && <Line type="monotone" name="MA (200)" dataKey="ma200" stroke="#ef4444" strokeWidth={1} dot={false} isAnimationActive={false} />}
@@ -434,7 +440,7 @@ const RealTimeChart = memo(({
               <CartesianGrid strokeDasharray="1 3" stroke="#242a32" opacity={0.4} />
               <XAxis dataKey="timestamp" stroke="#64748b" fontSize={9} />
               <YAxis stroke="#64748b" fontSize={9} domain={yDomain} orientation="right" />
-              <Tooltip contentStyle={{ backgroundColor: '#12161a', borderColor: '#474f59' }} />
+              <Tooltip contentStyle={{ backgroundColor: bgColor, borderColor: borderColor }} itemStyle={{ color: textColor }} />
               <Area type="monotone" dataKey="closePrice" fill="url(#colorLiveArea)" stroke="#f0b90b" strokeWidth={2} isAnimationActive={false} />
               <defs>
                 <linearGradient id="colorLiveArea" x1="0" y1="0" x2="0" y2="1">
@@ -448,7 +454,7 @@ const RealTimeChart = memo(({
               <CartesianGrid strokeDasharray="1 4" stroke="#242a32" opacity={0.5} />
               <XAxis dataKey="timestamp" stroke="#64748b" fontSize={9} />
               <YAxis stroke="#64748b" fontSize={9} domain={yDomain} orientation="right" />
-              <Tooltip contentStyle={{ backgroundColor: '#12161a', borderColor: '#474f59' }} />
+              <Tooltip contentStyle={{ backgroundColor: bgColor, borderColor: borderColor }} itemStyle={{ color: textColor }} />
               <Bar dataKey="high" shape={<Candlestick />} isAnimationActive={false}>
                 {displayData.map((entry, idx) => <Cell key={`cell-${idx}`} fill="transparent" />)}
               </Bar>
@@ -460,7 +466,7 @@ const RealTimeChart = memo(({
               <CartesianGrid strokeDasharray="1 4" stroke="#242a32" opacity={0.5} />
               <XAxis dataKey="timestamp" stroke="#64748b" fontSize={9} />
               <YAxis stroke="#64748b" fontSize={9} domain={yDomain} orientation="right" />
-              <Tooltip contentStyle={{ backgroundColor: '#12161a', borderColor: '#474f59' }} />
+              <Tooltip contentStyle={{ backgroundColor: bgColor, borderColor: borderColor }} itemStyle={{ color: textColor }} />
               <Bar dataKey="close" isAnimationActive={false}>
                 {displayData.map((entry, idx) => {
                   const isGreen = entry.close >= entry.open;
@@ -520,7 +526,7 @@ const RealTimeChart = memo(({
 });
 
 // ---------- WATCHLIST SPARKLINE ----------
-const WatchlistSparkline = memo(({ symbol, data, onClick, onRemove }) => {
+const WatchlistSparkline = memo(({ symbol, data, onClick, onRemove, isDarkMode }) => {
   const last = data.length > 0 ? data[data.length - 1] : null;
   const first = data.length > 0 ? data[0] : null;
   const change = (last && first) ? ((last.close - first.close) / first.close * 100) : 0;
@@ -529,7 +535,7 @@ const WatchlistSparkline = memo(({ symbol, data, onClick, onRemove }) => {
   return (
     <div 
       onClick={onClick}
-      className="flex-shrink-0 w-44 bg-slate-800 rounded p-2 cursor-pointer hover:bg-slate-700 transition-colors relative group"
+      className={`flex-shrink-0 w-44 rounded p-2 cursor-pointer transition-colors relative group ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-gray-200 hover:bg-gray-300'}`}
     >
       <button 
         onClick={(e) => { e.stopPropagation(); onRemove(); }}
@@ -563,7 +569,7 @@ const WatchlistSparkline = memo(({ symbol, data, onClick, onRemove }) => {
           </div>
         )}
       </div>
-      <div className="text-[10px] text-slate-400 mt-1">
+      <div className={`text-[10px] mt-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>
         ₹{last ? last.close.toFixed(2) : '--'}
       </div>
     </div>
@@ -571,13 +577,13 @@ const WatchlistSparkline = memo(({ symbol, data, onClick, onRemove }) => {
 });
 
 // ---------- HELP PAGE ----------
-const HelpPage = () => (
-  <div className="p-6 bg-[#161a1e] rounded border border-[#2b3139] text-slate-300 max-w-4xl mx-auto">
-    <h2 className="text-xl font-bold text-[#f0b90b] mb-4">📖 How to Use the Quant Suite</h2>
+const HelpPage = ({ isDarkMode }) => (
+  <div className={`p-6 rounded border ${isDarkMode ? 'bg-[#161a1e] border-[#2b3139] text-slate-300' : 'bg-white border-gray-300 text-gray-700'} max-w-4xl mx-auto`}>
+    <h2 className={`text-xl font-bold mb-4 ${isDarkMode ? 'text-[#f0b90b]' : 'text-amber-600'}`}>📖 How to Use the Quant Suite</h2>
     <div className="space-y-4 text-sm">
       <section>
-        <h3 className="font-bold text-white">1. Backtest Configuration (left panel)</h3>
-        <ul className="list-disc list-inside text-slate-400 space-y-1 ml-4">
+        <h3 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>1. Backtest Configuration (left panel)</h3>
+        <ul className="list-disc list-inside space-y-1 ml-4">
           <li><strong>Timeline:</strong> Pick start/end dates for the backtest.</li>
           <li><strong>Presets:</strong> Choose a strategy preset (Quality Growth, Deep Value).</li>
           <li><strong>Filters:</strong> Set market cap, ROCE, and PAT filters for stock selection.</li>
@@ -587,8 +593,8 @@ const HelpPage = () => (
         </ul>
       </section>
       <section>
-        <h3 className="font-bold text-white">2. Technical Chart (middle top)</h3>
-        <ul className="list-disc list-inside text-slate-400 space-y-1 ml-4">
+        <h3 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>2. Technical Chart (middle top)</h3>
+        <ul className="list-disc list-inside space-y-1 ml-4">
           <li><strong>Timeframes:</strong> Switch between 1m, 5m, 15m, 1h, 4h, 1D.</li>
           <li><strong>Chart Types:</strong> Candlestick, line, bar, area.</li>
           <li><strong>Indicators:</strong> Toggle Bollinger Bands and moving averages (MA50).</li>
@@ -597,16 +603,16 @@ const HelpPage = () => (
         </ul>
       </section>
       <section>
-        <h3 className="font-bold text-white">3. Watchlist (middle bottom)</h3>
-        <ul className="list-disc list-inside text-slate-400 space-y-1 ml-4">
+        <h3 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>3. Watchlist (middle bottom)</h3>
+        <ul className="list-disc list-inside space-y-1 ml-4">
           <li><strong>Add:</strong> Click the “Add Current” button to add the selected stock.</li>
           <li><strong>Remove:</strong> Hover over a watchlist card and click the X button.</li>
           <li><strong>Switch:</strong> Click any sparkline to switch the main chart to that symbol.</li>
         </ul>
       </section>
       <section>
-        <h3 className="font-bold text-white">4. Strategy Metrics (top tab)</h3>
-        <ul className="list-disc list-inside text-slate-400 space-y-1 ml-4">
+        <h3 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>4. Strategy Metrics (top tab)</h3>
+        <ul className="list-disc list-inside space-y-1 ml-4">
           <li><strong>Equity Curve:</strong> Shows portfolio growth over time (with benchmark).</li>
           <li><strong>Drawdown:</strong> Underwater percentage from peak.</li>
           <li><strong>Top Winners/Losers:</strong> Best and worst performing stocks.</li>
@@ -614,8 +620,8 @@ const HelpPage = () => (
         </ul>
       </section>
       <section>
-        <h3 className="font-bold text-white">5. Other Tabs</h3>
-        <ul className="list-disc list-inside text-slate-400 space-y-1 ml-4">
+        <h3 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>5. Other Tabs</h3>
+        <ul className="list-disc list-inside space-y-1 ml-4">
           <li><strong>Heatmap:</strong> Visual sector allocation based on market cap.</li>
           <li><strong>Order Depth:</strong> Simulated bid/ask order book.</li>
           <li><strong>Pine Script IDE:</strong> Write and compile TradingView‑style scripts.</li>
@@ -710,16 +716,7 @@ strategy.risk.stop_loss(stop_loss_pct)`
   const [realtimeHistoryBuffer, setRealtimeHistoryBuffer] = useState([]);
   const [orderBookSpread, setOrderBookSpread] = useState({ bids: [], asks: [], spreadValue: 0.15 });
 
-  const [tickerPrices, setTickerPrices] = useState([
-    { symbol: "RELIANCE.NS", price: 2452.35, change: 1.22, isUp: true, isFavorite: true, sector: "Energy", mcap: 1750000 },
-    { symbol: "TCS.NS", price: 3820.40, change: -0.82, isUp: false, isFavorite: true, sector: "Technology", mcap: 1400000 },
-    { symbol: "INFY.NS", price: 1410.15, change: 2.15, isUp: true, isFavorite: false, sector: "Technology", mcap: 600000 },
-    { symbol: "HDFCBANK.NS", price: 1645.90, change: -0.34, isUp: false, isFavorite: false, sector: "Financials", mcap: 1250000 },
-    { symbol: "ICICIBANK.NS", price: 1012.20, change: 0.95, isUp: true, isFavorite: false, sector: "Financials", mcap: 720000 },
-    { symbol: "BHARTIARTL.NS", price: 1135.00, change: 1.12, isUp: true, isFavorite: false, sector: "Telecom", mcap: 680000 },
-    { symbol: "WIPRO.NS", price: 475.20, change: -1.35, isUp: false, isFavorite: false, sector: "Technology", mcap: 240000 },
-    { symbol: "SBIN.NS", price: 725.60, change: 0.40, isUp: true, isFavorite: false, sector: "Financials", mcap: 640000 }
-  ]);
+  const [tickerPrices, setTickerPrices] = useState([]);
 
   const [isStreamingPaused, setIsStreamingPaused] = useState(false);
   const [savedStrategies, setSavedStrategies] = useState([]);
@@ -730,18 +727,16 @@ strategy.risk.stop_loss(stop_loss_pct)`
   const [chartZoom, setChartZoom] = useState(1.0);
   const [chartOffset, setChartOffset] = useState(0);
   const [isHistoricalLoading, setIsHistoricalLoading] = useState(false);
-
-  // NEW: Intraday data state
   const [isIntradayLoading, setIsIntradayLoading] = useState(false);
 
-  // NEW: All symbols for dropdown
   const [allSymbols, setAllSymbols] = useState([]);
   const [isSymbolsLoading, setIsSymbolsLoading] = useState(true);
 
-  // Watchlist
   const [watchlist, setWatchlist] = useState(['RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS']);
   const [watchlistBuffers, setWatchlistBuffers] = useState({});
   const watchlistConnectionsRef = useRef({});
+
+  const [marketStatus, setMarketStatus] = useState('Closed');
 
   // -------------------------------------------------------------------------
   // REFS
@@ -751,12 +746,10 @@ strategy.risk.stop_loss(stop_loss_pct)`
   const fallbackTimerRef = useRef(null);
 
   const throttledBufferUpdate = useRef(throttle((tick) => {
-    // Always push to the ref buffer
     bufferRef.current.push(tick);
     if (bufferRef.current.length > 1000) {
       bufferRef.current = bufferRef.current.slice(-1000);
     }
-    // Update the state only if not paused
     if (!isStreamingPaused) {
       setRealtimeHistoryBuffer([...bufferRef.current]);
     }
@@ -766,12 +759,22 @@ strategy.risk.stop_loss(stop_loss_pct)`
   // EFFECTS
   // -------------------------------------------------------------------------
   useEffect(() => {
+    const now = new Date();
+    const day = now.getDay();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const isOpen = day >= 1 && day <= 5 && (hours > 9 || (hours === 9 && minutes >= 15)) && (hours < 15 || (hours === 15 && minutes <= 30));
+    setMarketStatus(isOpen ? 'Open' : 'Closed');
+  }, []);
+
+  useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('strategies') || '[]');
       setSavedStrategies(saved);
     } catch (e) { /* ignore */ }
   }, []);
 
+  // Marquee styles – slowed to 120s
   useEffect(() => {
     const styleId = "quant-premium-terminal-marquee-styles";
     let styleTag = document.getElementById(styleId);
@@ -786,7 +789,7 @@ strategy.risk.stop_loss(stop_loss_pct)`
         .marquee-running-track-premium {
           display: flex;
           width: max-content;
-          animation: quantTerminalMarquee 32s linear infinite;
+          animation: quantTerminalMarquee 300s linear infinite;
         }
         .marquee-running-track-premium:hover {
           animation-play-state: paused;
@@ -863,7 +866,6 @@ strategy.risk.stop_loss(stop_loss_pct)`
     }
   }, [showHistorical, selectedStockTicker]);
 
-  // Fetch symbols for dropdown
   useEffect(() => {
     const fetchSymbols = async () => {
       try {
@@ -871,10 +873,19 @@ strategy.risk.stop_loss(stop_loss_pct)`
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setAllSymbols(data);
+        const initialPrices = data.map(item => ({
+          symbol: item.symbol,
+          price: Math.round(Math.random() * 5000 + 500),
+          change: (Math.random() - 0.5) * 10,
+          isUp: Math.random() > 0.5,
+          isFavorite: false,
+          sector: 'N/A',
+          mcap: Math.round(Math.random() * 1000000)
+        }));
+        setTickerPrices(initialPrices);
       } catch (err) {
         console.error("Failed to fetch symbols:", err);
-        // Fallback to static list if backend fails
-        setAllSymbols(tickerPrices.map(t => ({ symbol: t.symbol, company_name: t.symbol })));
+        setAllSymbols([]);
       } finally {
         setIsSymbolsLoading(false);
       }
@@ -882,7 +893,6 @@ strategy.risk.stop_loss(stop_loss_pct)`
     fetchSymbols();
   }, []);
 
-  // Fetch intraday data when timeframe changes (only in realtime mode)
   useEffect(() => {
     if (!selectedStockTicker || showHistorical) return;
 
@@ -924,7 +934,6 @@ strategy.risk.stop_loss(stop_loss_pct)`
     setChartOffset(0);
   }, [selectedStockTicker, showHistorical, timeframe]);
 
-  // Main SSE for selected ticker (with robust fallback)
   useEffect(() => {
     if (!selectedStockTicker) return;
 
@@ -1018,7 +1027,6 @@ strategy.risk.stop_loss(stop_loss_pct)`
     };
   }, [selectedStockTicker]);
 
-  // Watchlist SSE connections
   useEffect(() => {
     Object.values(watchlistConnectionsRef.current).forEach(conn => conn.close());
     watchlistConnectionsRef.current = {};
@@ -1198,11 +1206,7 @@ strategy.risk.stop_loss(stop_loss_pct)`
     }));
   }, [simulationState.data]);
 
-  // Filter marquee based on favorites
-  const marqueeFeed = useMemo(() => {
-    return tickerPrices.filter(item => item.isFavorite);
-  }, [tickerPrices]);
-
+  const marqueeFeed = useMemo(() => tickerPrices, [tickerPrices]);
   const doubleMarqueeFeed = useMemo(() => [...marqueeFeed, ...marqueeFeed], [marqueeFeed]);
 
   const dynamicRuleScreenerEnforcers = () => setRankingRules([...rankingRules, { metric: "roce", direction: "desc", weight: 0 }]);
@@ -1336,7 +1340,6 @@ strategy.risk.stop_loss(stop_loss_pct)`
     return perf.slice(-3).reverse();
   }, [simulationState.data]);
 
-  // Watchlist handlers
   const addToWatchlist = (symbol) => {
     if (!watchlist.includes(symbol) && watchlist.length < 6) {
       setWatchlist([...watchlist, symbol]);
@@ -1354,7 +1357,6 @@ strategy.risk.stop_loss(stop_loss_pct)`
     });
   };
 
-  // Toggle favorite on marquee
   const toggleFavorite = (symbol) => {
     setTickerPrices(prev => prev.map(item =>
       item.symbol === symbol ? { ...item, isFavorite: !item.isFavorite } : item
@@ -1364,8 +1366,11 @@ strategy.risk.stop_loss(stop_loss_pct)`
   // -------------------------------------------------------------------------
   // RENDER
   // -------------------------------------------------------------------------
+  const bgClass = isDarkMode ? 'bg-[#0b0e11] text-[#eaecef]' : 'bg-[#f4f6f9] text-[#1e2329]';
+  const panelBg = isDarkMode ? 'bg-[#161a1e] border-[#2b3139]' : 'bg-white border-gray-300';
+
   return (
-    <div className={`min-h-screen w-full font-mono text-xs antialiased flex flex-col justify-between overflow-x-hidden pt-[34px] ${isDarkMode ? "bg-[#0b0e11] text-[#eaecef]" : "bg-[#f4f6f9] text-[#1e2329]"}`}>
+    <div className={`min-h-screen w-full font-mono text-xs antialiased flex flex-col justify-between overflow-x-hidden pt-[34px] ${bgClass}`}>
       {/* Top Marquee */}
       <section className="w-full fixed top-0 left-0 right-0 z-50 select-none border-b flex items-center h-[34px] bg-[#12161a] border-[#2b3139] text-[10px] font-bold">
         <div className="flex items-center gap-1.5 shrink-0 px-4 h-full border-r border-[#2b3139] text-[#f0b90b] z-20 bg-[#12161a]">
@@ -1398,32 +1403,48 @@ strategy.risk.stop_loss(stop_loss_pct)`
       </section>
 
       {/* Header */}
-      <header className="w-full px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between border-b bg-[#161a1e] border-[#2b3139] gap-4 shadow-xl select-none z-10">
-        <div className="flex items-center gap-3">
-          <div className="h-3.5 w-3.5 bg-[#f0b90b] rotate-45 transform border border-amber-300 shadow-lg animate-pulse" />
-          <div className="flex flex-col">
-            <span className="text-sm font-black tracking-wider text-[#f0b90b] font-sans">脉 HASMUDDIN ADVANCED QUANT SUITE</span>
-            <span className="text-[9px] text-slate-500 uppercase tracking-tight">Institutional Terminal Architecture Environment Matrix</span>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex p-0.5 rounded border border-[#474f59] bg-[#2b3139] font-bold text-[11px] shadow-inner">
-            <button onClick={() => setWorkspaceMode("individual_company")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "individual_company" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>🕯 Technical Chart</button>
-            <button onClick={() => setWorkspaceMode("strategy")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "strategy" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>📊 Strategy Metrics</button>
-            <button onClick={() => setWorkspaceMode("heatmap")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "heatmap" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>🧱 Sector Heatmap</button>
-            <button onClick={() => setWorkspaceMode("orderbook")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "orderbook" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>🗂 Order Depth</button>
-            <button onClick={() => setWorkspaceMode("help")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "help" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>📖 Help</button>
-          </div>
-          <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-1.5 border border-slate-700 rounded bg-[#2b3139] text-amber-400 hover:text-white transition-colors cursor-pointer">{isDarkMode ? <Sun size={13}/> : <Moon size={13}/>}</button>
-        </div>
-      </header>
-
+      {/* Header */}
+<header className={`w-full px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between border-b ${isDarkMode ? 'bg-[#161a1e] border-[#2b3139]' : 'bg-white border-gray-300'} gap-4 shadow-xl select-none z-10`}>
+  <div className="flex items-center gap-3">
+    {/* Logo - bigger, no rotation */}
+    <img
+      src="/Logo.png"
+      alt="QuantForge"
+      className="h-10 w-auto"
+    />
+    <div className="flex flex-col">
+      <span className="text-sm font-black tracking-wider text-[#f0b90b] font-sans">QuantForge Dashboard</span>
+      <span className="text-[9px] text-slate-500 uppercase tracking-tight">Institutional Terminal 
+        Architecture Environment Matrix</span>
+    </div>
+    <div className="flex items-center gap-2 ml-4">
+      <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${marketStatus === 'Open' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+        {marketStatus === 'Open' ? '🟢 Market Open' : '🔴 Market Closed'}
+      </span>
+      {livePriceData.price && (
+        <span className={`text-[9px] font-bold ${livePriceData.change >= 0 ? 'text-[#02c076]' : 'text-[#f6465d]'}`}>
+          {selectedStockTicker.split('.')[0]}: ₹{livePriceData.price.toFixed(2)} ({livePriceData.change >= 0 ? '+' : ''}{livePriceData.change.toFixed(2)}%)
+        </span>
+      )}
+    </div>
+  </div>
+  <div className="flex flex-wrap items-center gap-3">
+    <div className={`flex p-0.5 rounded border ${isDarkMode ? 'border-[#474f59] bg-[#2b3139]' : 'border-gray-400 bg-gray-200'} font-bold text-[11px] shadow-inner`}>
+      <button onClick={() => setWorkspaceMode("individual_company")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "individual_company" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>🕯 Technical Chart</button>
+      <button onClick={() => setWorkspaceMode("strategy")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "strategy" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>📊 Strategy Metrics</button>
+      <button onClick={() => setWorkspaceMode("heatmap")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "heatmap" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>🧱 Sector Heatmap</button>
+      <button onClick={() => setWorkspaceMode("orderbook")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "orderbook" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>🗂 Order Depth</button>
+      <button onClick={() => setWorkspaceMode("help")} className={`px-3 py-1 rounded cursor-pointer transition-all ${workspaceMode === "help" ? "bg-[#f0b90b] text-[#0b0e11] font-black" : "text-slate-400 hover:text-white"}`}>📖 Help</button>
+    </div>
+    <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-1.5 border rounded ${isDarkMode ? 'border-slate-700 bg-[#2b3139] text-amber-400' : 'border-gray-300 bg-gray-200 text-amber-600'} hover:text-white transition-colors cursor-pointer`}>{isDarkMode ? <Sun size={13}/> : <Moon size={13}/>}</button>
+  </div>
+</header>
       {/* Main 3-pane layout */}
       <div className="w-full flex-grow grid grid-cols-1 lg:grid-cols-[290px_1fr] xl:grid-cols-[320px_1fr_310px] gap-0.5 bg-slate-800/20">
         {/* Pane 1: Strategy Controls */}
-        <div className="p-4 space-y-4 bg-[#161a1e] border-r border-[#2b3139] overflow-y-auto max-h-[calc(100vh-5rem)] shadow-inner">
+        <div className={`p-4 space-y-4 ${panelBg} border-r overflow-y-auto max-h-[calc(100vh-5rem)] shadow-inner`}>
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b pb-2 border-slate-700/20 text-[#f0b90b]">
+            <div className={`flex items-center justify-between border-b pb-2 ${isDarkMode ? 'border-slate-700/20' : 'border-gray-300'} text-[#f0b90b]`}>
               <div className="flex items-center gap-1.5"><Sliders size={13} /><span className="font-bold text-[11px] uppercase tracking-wider">System Rule Constraints</span></div>
               <Settings size={12} className="text-slate-500 animate-spin" style={{ animationDuration: '6s' }}/>
             </div>
@@ -1557,29 +1578,30 @@ strategy.risk.stop_loss(stop_loss_pct)`
                 showDropdown={equityControls.showDropdown}
                 controls={equityControls}
                 setControls={setEquityControls}
+                isDarkMode={isDarkMode}
               />
-              <DrawdownChart data={processedDrawdownChartData} />
+              <DrawdownChart data={processedDrawdownChartData} isDarkMode={isDarkMode} />
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#0b0e11] p-3 rounded border border-slate-800">
+                <div className={`p-3 rounded border ${isDarkMode ? 'bg-[#0b0e11] border-slate-800' : 'bg-gray-100 border-gray-300'}`}>
                   <span className="text-[10px] font-bold text-[#02c076] uppercase">🏆 Top Winners</span>
                   {topWinners.length > 0 ? (
                     <ul className="mt-2 space-y-1 text-[11px]">
                       {topWinners.map((item, idx) => (
-                        <li key={idx} className="flex justify-between border-b border-slate-800/50 py-1">
-                          <span className="text-white font-bold">{item.symbol}</span>
+                        <li key={idx} className={`flex justify-between border-b py-1 ${isDarkMode ? 'border-slate-800/50' : 'border-gray-300'}`}>
+                          <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{item.symbol}</span>
                           <span className="text-[#02c076]">+{item.return}%</span>
                         </li>
                       ))}
                     </ul>
                   ) : <div className="text-slate-500 text-[10px] mt-2">No data yet</div>}
                 </div>
-                <div className="bg-[#0b0e11] p-3 rounded border border-slate-800">
+                <div className={`p-3 rounded border ${isDarkMode ? 'bg-[#0b0e11] border-slate-800' : 'bg-gray-100 border-gray-300'}`}>
                   <span className="text-[10px] font-bold text-[#f6465d] uppercase">📉 Top Losers</span>
                   {topLosers.length > 0 ? (
                     <ul className="mt-2 space-y-1 text-[11px]">
                       {topLosers.map((item, idx) => (
-                        <li key={idx} className="flex justify-between border-b border-slate-800/50 py-1">
-                          <span className="text-white font-bold">{item.symbol}</span>
+                        <li key={idx} className={`flex justify-between border-b py-1 ${isDarkMode ? 'border-slate-800/50' : 'border-gray-300'}`}>
+                          <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{item.symbol}</span>
                           <span className="text-[#f6465d]">{item.return}%</span>
                         </li>
                       ))}
@@ -1626,10 +1648,11 @@ strategy.risk.stop_loss(stop_loss_pct)`
                 setChartOffset={setChartOffset}
                 isHistoricalLoading={isHistoricalLoading}
                 isIntradayLoading={isIntradayLoading}
+                isDarkMode={isDarkMode}
               />
               
               {/* Watchlist Panel */}
-              <div className="p-3 bg-[#161a1e] rounded border border-[#2b3139]">
+              <div className={`p-3 rounded border ${panelBg}`}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <Layers size={12} /> Watchlist
@@ -1658,6 +1681,7 @@ strategy.risk.stop_loss(stop_loss_pct)`
                         data={buffer}
                         onClick={() => { setSelectedStockStockTicker(sym); setShowHistorical(false); }}
                         onRemove={() => removeFromWatchlist(sym)}
+                        isDarkMode={isDarkMode}
                       />
                     );
                   })}
@@ -1672,13 +1696,13 @@ strategy.risk.stop_loss(stop_loss_pct)`
           )}
 
           {workspaceMode === "heatmap" && (
-            <div className="p-4 rounded border bg-[#161a1e] border-[#2b3139] min-h-[440px] flex flex-col justify-between shadow-xl">
+            <div className={`p-4 rounded border ${panelBg} min-h-[440px] flex flex-col justify-between shadow-xl`}>
               <div className="border-b pb-2 border-slate-800 mb-3 flex justify-between items-center select-none">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1"><Grid size={12}/> Cross-Sectional Large Cap Sector Allocation Heatmap</span>
                 <span className="text-[9px] text-slate-500">Block Sizing Scaled by Market Cap Vector Value</span>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 flex-grow">
-                {tickerPrices.map((tick, i) => {
+                {tickerPrices.slice(0, 20).map((tick, i) => {
                   const paddingScaleSize = Math.max(2, Math.floor(tick.mcap / 400000));
                   return (
                     <div
@@ -1706,7 +1730,7 @@ strategy.risk.stop_loss(stop_loss_pct)`
 
           {workspaceMode === "orderbook" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded border bg-[#161a1e] border-[#2b3139] shadow-xl">
+              <div className={`p-4 rounded border ${panelBg} shadow-xl`}>
                 <span className="text-[10px] font-bold text-[#f6465d] uppercase block border-b pb-2 border-slate-800 mb-2">🔴 LIQUIDITY DEPTH MATRIX: ASK SPREADS SELL ORDERS</span>
                 <table className="w-full font-mono text-[11px] text-left border-collapse">
                   <thead><tr className="text-slate-500 font-bold text-[10px] border-b border-slate-800/60"><th className="pb-1">PRICE (₹)</th><th className="pb-1 text-right">SIZE (VOL)</th><th className="pb-1 text-right">ACCUMULATIVE TOTAL</th></tr></thead>
@@ -1721,7 +1745,7 @@ strategy.risk.stop_loss(stop_loss_pct)`
                   </tbody>
                 </table>
               </div>
-              <div className="p-4 rounded border bg-[#161a1e] border-[#2b3139] shadow-xl">
+              <div className={`p-4 rounded border ${panelBg} shadow-xl`}>
                 <span className="text-[10px] font-bold text-[#02c076] uppercase block border-b pb-2 border-slate-800 mb-2">🟢 LIQUIDITY DEPTH MATRIX: BID SPREADS BUY ORDERS</span>
                 <table className="w-full font-mono text-[11px] text-left border-collapse">
                   <thead><tr className="text-slate-500 font-bold text-[10px] border-b border-slate-800/60"><th className="pb-1">PRICE (₹)</th><th className="pb-1 text-right">SIZE (VOL)</th><th className="pb-1 text-right">ACCUMULATIVE TOTAL</th></tr></thead>
@@ -1739,10 +1763,10 @@ strategy.risk.stop_loss(stop_loss_pct)`
             </div>
           )}
 
-          {workspaceMode === "help" && <HelpPage />}
+          {workspaceMode === "help" && <HelpPage isDarkMode={isDarkMode} />}
 
           {/* Table section */}
-          <div className="p-4 rounded border bg-[#161a1e] border-[#2b3139] shadow-xl w-full">
+          <div className={`p-4 rounded border ${panelBg} shadow-xl w-full`}>
             <div className="flex flex-wrap justify-between items-center border-b pb-2 border-slate-700/20 mb-3 select-none gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">📋 Target Allocation Registry Ledger:</span>
@@ -1801,7 +1825,7 @@ strategy.risk.stop_loss(stop_loss_pct)`
         </div>
 
         {/* Pane 3: Utility Dock */}
-        <div className="p-4 bg-[#161a1e] border-l border-[#2b3139] space-y-4 overflow-y-auto max-h-[calc(100vh-5rem)] shadow-inner">
+        <div className={`p-4 ${panelBg} border-l space-y-4 overflow-y-auto max-h-[calc(100vh-5rem)] shadow-inner`}>
           <div className="p-3 rounded bg-slate-900 border border-slate-800 space-y-2.5 font-sans text-[11px] shadow-lg">
             <div className="flex justify-between items-center border-b border-slate-800 pb-1.5 select-none">
               <span className="text-[10px] font-mono font-black text-sky-400 uppercase flex items-center gap-1"><Code size={12}/> Pine Script IDE Workspace</span>
@@ -1887,54 +1911,88 @@ strategy.risk.stop_loss(stop_loss_pct)`
         </div>
       </div>
 
-      {/* FOOTER */}
-      <footer className="w-full border-t bg-[#0b0e11] border-[#2b3139] text-[#848e9c] select-none font-sans mt-auto z-10 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-[11px]">
+      {/* FOOTER – with Share2 icons and enlarged creator text */}
+      <footer className={`w-full border-t ${isDarkMode ? 'bg-[#0b0e11] border-[#2b3139]' : 'bg-gray-100 border-gray-300'} text-[#848e9c] select-none font-sans mt-auto z-10 shadow-2xl`}>
+        <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8 text-[11px]">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 bg-[#f0b90b] rotate-45 transform border border-amber-400 shadow shadow-amber-400/50" />
-              <span className="font-mono font-black tracking-wider text-[#eaecef] text-[13px]">HASMUDDIN.DEV</span>
+              <span className="font-mono font-black tracking-wider text-[#eaecef] text-[13px]">Mohammad Hasmuddin</span>
             </div>
-            <p className="text-slate-500 text-[10px] leading-relaxed max-w-xs">
-              Institutional‑grade automated backtester with real‑time data ingestion, advanced ranking, and analytics.
+            <p className={`text-[10px] leading-relaxed max-w-xs ${isDarkMode ? 'text-slate-500' : 'text-gray-600'}`}>
+              Backend engineer crafting scalable APIs and cloud architectures. Let's build something great together.
             </p>
-            <div className="pt-1 text-[9px] text-slate-600">
-              <span className="block">⚡ Built with React, FastAPI & PostgreSQL</span>
-              <span className="block">📊 Quant Engine v3.0</span>
+            <div className="flex gap-3 pt-2">
+              <a href="#" className="text-slate-500 hover:text-[#f0b90b] transition-colors"><Share2 size={18}/></a>
+              <a href="#" className="text-slate-500 hover:text-[#f0b90b] transition-colors"><Share2 size={18}/></a>
+              <a href="#" className="text-slate-500 hover:text-[#f0b90b] transition-colors"><Share2 size={18}/></a>
+              <a href="#" className="text-slate-500 hover:text-[#f0b90b] transition-colors"><Share2 size={18}/></a>
+              <a href="#" className="text-slate-500 hover:text-[#f0b90b] transition-colors"><Share2 size={18}/></a>
             </div>
           </div>
           <div>
-            <h4 className="font-bold text-[#eaecef] uppercase tracking-wider text-[10px] mb-3">Support</h4>
+            <h4 className={`font-bold uppercase tracking-wider text-[10px] mb-3 ${isDarkMode ? 'text-[#eaecef]' : 'text-gray-800'}`}>Quick Links</h4>
             <ul className="space-y-1.5 text-[10px]">
-              <li><a href="mailto:hasmudin035@gmail.com" className="hover:text-[#f0b90b] transition-colors flex items-center gap-1"><Mail size={11}/> Email</a></li>
-              <li><a href="#" className="hover:text-[#f0b90b] transition-colors flex items-center gap-1"><Phone size={11}/> +91 9382127307</a></li>
-              <li><a href="#" className="hover:text-[#f0b90b] transition-colors flex items-center gap-1"><MapPin size={11}/> Bengaluru, India</a></li>
+              <li><a href="https://github.com/Lester7307/quant-suite" target="_blank" rel="noopener noreferrer" className={`hover:text-[#f0b90b] transition-colors ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>GitHub Repo</a></li>
+              <li>
+  <a
+    href="https://github.com/Lester7307/quant-suite/blob/main/DOCUMENTATION.md"
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`hover:text-[#f0b90b] transition-colors ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}
+  >
+    Documentation
+  </a>
+</li>
+<li>
+  <a
+    href="https://github.com/Lester7307/quant-suite"
+    className={`hover:text-[#f0b90b] transition-colors ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}
+  >
+    API Reference
+  </a>
+</li>
+<li>
+  <a
+    href="https://github.com/Lester7307/quant-suite"
+    className={`hover:text-[#f0b90b] transition-colors ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}
+  >
+    Changelog
+  </a>
+</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-[#eaecef] uppercase tracking-wider text-[10px] mb-3">Creator</h4>
-            <div className="space-y-1.5 text-[10px]">
-              <p className="text-slate-400">Visit creator @</p>
-              <a 
-                href="https://www.lesterelite.tech" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-[#f0b90b] hover:underline font-bold text-[12px] block"
-              >
-                www.lesterelite.tech
-              </a>
-              <div className="pt-1 text-[9px] text-slate-600">
-                <span className="block">🚀 Built with ❤️</span>
-                <span className="block">© 2026 All rights reserved.</span>
-              </div>
+            <h4 className={`font-bold uppercase tracking-wider text-[10px] mb-3 ${isDarkMode ? 'text-[#eaecef]' : 'text-gray-800'}`}>Support</h4>
+            <ul className="space-y-1.5 text-[10px]">
+              <li><a href="mailto:hasmudin035@gmail.com" className={`hover:text-[#f0b90b] transition-colors flex items-center gap-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}><Mail size={11}/> Hasmudin035@gmail.com</a></li>
+              <li><a href="#" className={`hover:text-[#f0b90b] transition-colors flex items-center gap-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}><Phone size={11}/> +91 9382127307</a></li>
+              <li><a href="#" className={`hover:text-[#f0b90b] transition-colors flex items-center gap-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}><MapPin size={11}/> Bengaluru, India</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className={`font-bold uppercase tracking-wider text-[10px] mb-3 ${isDarkMode ? 'text-[#eaecef]' : 'text-gray-800'}`}>Get the tips you need</h4>
+            <div className="flex items-center gap-2">
+              <input
+                type="email"
+                placeholder="Email address"
+                className={`flex-1 px-3 py-2 rounded border text-[10px] outline-none ${isDarkMode ? 'bg-[#1e2329] border-[#2b3139] text-white' : 'bg-white border-gray-300 text-gray-800'}`}
+              />
+              <button className="bg-[#f0b90b] text-slate-950 px-3 py-2 rounded font-bold hover:bg-amber-400 transition-colors">
+                <Send size={14} />
+              </button>
             </div>
+            <p className="text-[9px] text-slate-500 mt-2">Get the latest tips and insights.</p>
           </div>
         </div>
-        <div className="border-t border-slate-900/60 py-3 px-6 flex flex-col sm:flex-row justify-between items-center text-[9px] text-slate-600 font-mono">
-          <span>HASMUDDIN ADVANCED QUANT SUITE — Institutional Terminal</span>
+        <div className="border-t border-slate-900/60 py-4 px-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-[9px] text-slate-600 font-mono">
+          <span>© 2026 Mohammad Hasmuddin — All rights reserved.</span>
           <span className="flex items-center gap-4">
             <span className="flex items-center gap-1"><ShieldCheck size={10} className="text-[#02c076]"/> SSL_SECURE</span>
             <span>COMP_NODE_v3.0</span>
+            <span className="text-base font-bold">
+              Visit creator @ <a href="https://www.lesterelite.tech" target="_blank" rel="noopener" className="text-[#f0b90b] hover:underline">www.lesterelite.tech</a>
+            </span>
           </span>
         </div>
       </footer>
